@@ -1,0 +1,58 @@
+-- UILibrary ModuleScript
+local Library = {}
+
+function Library:NewWindow(data)
+	local self = {}
+	local WindowName = data.Name or "Window"
+	local Tabs = {}
+
+
+
+	TitleBar.Text = WindowName
+
+	self.Selects = Selects
+	self.TabsHolder = TabsHolder
+
+	function self:NewTab(name)
+		local tab = {}
+		local tabFrame = Instance.new("Frame", TabsHolder)
+		tabFrame.Name = name
+		tabFrame.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+		tabFrame.Size = UDim2.new(1, 0, 1, 0)
+		tabFrame.Visible = false
+
+		local button = Instance.new("TextButton", Selects)
+		button.Size = UDim2.new(1, -10, 0, 30)
+		button.Position = UDim2.new(0, 5, 0, #Selects:GetChildren() * 35)
+		button.Text = name
+		button.TextColor3 = Color3.fromRGB(255, 255, 255)
+		button.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+
+		button.MouseButton1Click:Connect(function()
+			for _, t in ipairs(TabsHolder:GetChildren()) do
+				t.Visible = false
+			end
+			tabFrame.Visible = true
+		end)
+
+		function tab:NewButton(data)
+			local btn = Instance.new("TextButton", tabFrame)
+			btn.Size = UDim2.new(0, 150, 0, 30)
+			btn.Position = UDim2.new(0, 10, 0, #tabFrame:GetChildren() * 35)
+			btn.Text = data.Name or "Button"
+			btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+			btn.MouseButton1Click:Connect(function()
+				if data.Callback then
+					data.Callback()
+				end
+			end)
+		end
+
+		return tab
+	end
+
+	return self
+end
+
+return Library
