@@ -6,7 +6,130 @@ function Library:NewWindow(data)
 	local WindowName = data.Name or "Window"
 	local Tabs = {}
 
+local UIS = game:GetService("UserInputService")
+local S = Instance.new("ScreenGui", game.CoreGui)
+local F = Instance.new("Frame", S)
+local Shadow = Instance.new("ImageLabel", F)
+local TitleBar = Instance.new("TextLabel", F)
+local Close = Instance.new("TextButton", F)
+local UICorner = Instance.new("UICorner", F)
+local ShadowCorner = Instance.new("UICorner", Shadow)
+local ResizeButton = Instance.new("ImageButton", F)
+local Selects = Instance.new("ScrollingFrame", F)
+local SelectsUIStroke = Instance.new("UIStroke", Selects)
 
+S.Name = "Simple"
+S.ResetOnSpawn = false
+
+F.Size = UDim2.new(0, 600, 0, 400)
+F.Position = UDim2.new(0, 230, 0, 15)
+F.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+F.ZIndex = 2
+F.Active = true
+F.Draggable = false
+
+Shadow.BackgroundTransparency = 1
+Shadow.Size = UDim2.new(1, 30, 1, 30)
+Shadow.Position = UDim2.new(0, -15, 0, -15)
+Shadow.Image = "rbxassetid://1316045217"
+Shadow.ImageTransparency = 0.2
+Shadow.ImageColor3 = Color3.fromRGB(0, 0, 0)
+Shadow.ZIndex = -1
+
+UICorner.CornerRadius = UDim.new(0, 10)
+ShadowCorner.CornerRadius = UDim.new(0, 10)
+
+TitleBar.Size = UDim2.new(1, -40, 0, 40)
+TitleBar.Position = UDim2.new(0, 10, 0, 0)
+TitleBar.Text = "My GUI"
+TitleBar.BackgroundTransparency = 1
+TitleBar.TextColor3 = Color3.fromRGB(255, 255, 255)
+TitleBar.TextSize = 15
+TitleBar.TextXAlignment = Enum.TextXAlignment.Left
+TitleBar.ZIndex = 3
+
+Close.Text = "X"
+Close.Size = UDim2.new(0, 30, 0, 30)
+Close.Position = UDim2.new(1, -40, 0, 5)
+Close.TextColor3 = Color3.fromRGB(255, 255, 255)
+Close.Font = Enum.Font.GothamBold
+Close.TextSize = 20
+Close.ZIndex = 3
+Close.BackgroundTransparency = 1
+
+ResizeButton.Size = UDim2.new(0, 25, 0, 25)
+ResizeButton.Position = UDim2.new(1, -25, 1, -25)
+ResizeButton.ZIndex = 500
+ResizeButton.BackgroundTransparency = 1
+ResizeButton.Name = "Resize"
+
+Selects.Name = "Menu"
+Selects.Position = UDim2.new(0, 5, 0, 40)
+Selects.Size = UDim2.new(0.3, 0, 1, -45)
+Selects.ZIndex = 10
+Selects.ScrollBarThickness = 0
+Selects.BackgroundTransparency = 1
+Selects.AutomaticCanvasSize = Enum.AutomaticSize.Y
+
+SelectsUIStroke.Thickness = 5
+
+Close.MouseButton1Click:Connect(function()
+	S:Destroy()
+end)
+
+local dragging = false
+local dragInput, dragStart, startPos
+
+TitleBar.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		dragging = true
+		dragStart = input.Position
+		startPos = F.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				dragging = false
+			end
+		end)
+	end
+end)
+
+TitleBar.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement then
+		dragInput = input
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		F.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+local resizing = false
+local resizeStart, resizeOrig
+
+ResizeButton.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+		resizing = true
+		resizeStart = input.Position
+		resizeOrig = F.Size
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then
+				resizing = false
+			end
+		end)
+	end
+end)
+
+UIS.InputChanged:Connect(function(input)
+	if resizing and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+		local delta = input.Position - resizeStart
+		local newW = math.max(200, resizeOrig.X.Offset + delta.X)
+		local newH = math.max(100, resizeOrig.Y.Offset + delta.Y)
+		F.Size = UDim2.new(0, newW, 0, newH)
+	end
+end)
 
 	TitleBar.Text = WindowName
 
